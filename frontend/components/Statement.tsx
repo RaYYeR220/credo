@@ -6,7 +6,15 @@ import { maxPoints } from "@/lib/credo";
 
 /** Renders the Credo "Statement of Credit Assessment" document (the approved final-b design)
  *  from a view-model. The CTA area is injected so demo vs. live flows can differ. */
-export function Statement({ data, cta }: { data: StatementData; cta: React.ReactNode }) {
+export function Statement({
+  data,
+  cta,
+  sample = false,
+}: {
+  data: StatementData;
+  cta: React.ReactNode;
+  sample?: boolean;
+}) {
   const fillRef = useRef<HTMLDivElement>(null);
   const barRefs = useRef<(HTMLElement | null)[]>([]);
   const top = maxPoints(data.signals);
@@ -41,6 +49,12 @@ export function Statement({ data, cta }: { data: StatementData; cta: React.React
 
   return (
     <div className="doc">
+      {sample && (
+        <div className="sample-banner">
+          <b>◆ Sample ◆</b>
+          <span>Connect a wallet for a live, AI-underwritten assessment of your own history</span>
+        </div>
+      )}
       <header className="masthead">
         <div className="reg-row rv d1">
           <span>Report № {data.reportNo}</span>

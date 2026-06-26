@@ -98,6 +98,17 @@ body::before {
 }
 .doc > * { position: relative; z-index: 2; }
 
+/* Sample banner — shown before a wallet is connected so the populated statement
+   below is unmistakably a specimen, not live data. */
+.sample-banner {
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  background: var(--oxblood); color: var(--cream);
+  font-family: var(--font-mono), monospace; font-size: 10.5px; letter-spacing: 0.26em;
+  text-transform: uppercase; padding: 9px 16px; text-align: center;
+}
+.sample-banner b { letter-spacing: 0.42em; font-weight: 700; }
+.sample-banner span { color: rgba(247, 240, 225, 0.78); letter-spacing: 0.15em; }
+
 /* Masthead */
 .masthead { padding: 30px clamp(22px, 4vw, 52px) 0; text-align: center; position: relative; }
 .reg-row { display: flex; justify-content: space-between; font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.16em; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 16px; }

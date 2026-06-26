@@ -182,7 +182,7 @@ export default function Home() {
 
       {notice && <div className={`notice${notice.err ? " err" : ""}`}>{notice.text}</div>}
 
-      <Statement data={data} cta={cta} />
+      <Statement data={data} cta={cta} sample={!live} />
     </>
   );
 }
