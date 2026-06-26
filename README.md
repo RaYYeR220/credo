@@ -9,6 +9,8 @@ Built for the **HSK Chain "On‑Chain Horizon" Hackathon (Japan)** — AI track.
 > **▶ Try it live:** **https://credo-phi.vercel.app** — connect a wallet, hit *Assess my wallet*, and get a
 > real, Gemini‑written underwriting rationale over your actual on‑chain history, plus a signed
 > on‑chain‑enforceable offer. (The score is deterministic; the AI only narrates it.)
+>
+> **▶ Demo video (1:48):** https://youtu.be/jgFTCroi1FI
 
 ---
 
