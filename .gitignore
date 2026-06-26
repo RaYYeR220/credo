@@ -1,0 +1,45 @@
+# Node
+node_modules/
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.key
+keystore/
+
+# Foundry
+contracts/cache/
+contracts/out/
+contracts/broadcast/**/dry-run/
+contracts/deployments/31337.json
+
+# Next.js / build
+web/.next/
+web/out/
+**/dist/
+**/build/
+*.tsbuildinfo
+
+# Misc
+.DS_Store
+.idea/
+.vscode/
+coverage/
+*.log
+
+# Session/agent local state (keep BRIEF.md tracked)
+.remember/tmp/
+.remember/logs/
+
+# Playwright / scratch screenshots
+.playwright-mcp/
+*.jpeg
+*.png
+!web/**/*.png

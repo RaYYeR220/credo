@@ -1,0 +1,28 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.28"
+evm_version = "cancun"          # HSK Chain = OP Stack post-Ecotone → Cancun opcodes (mcopy/tstore) live
+optimizer = true
+optimizer_runs = 200
+remappings = [
+    "@openzeppelin/=lib/openzeppelin-contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+fs_permissions = [{ access = "read-write", path = "./deployments" }]
+
+[fmt]
+line_length = 110
+tab_width = 4
+bracket_spacing = true
+
+# HSK Chain (HashKey Chain) — OP Stack L2, EVM
+[rpc_endpoints]
+hsk_mainnet = "https://mainnet.hsk.xyz"
+hsk_testnet = "https://testnet.hsk.xyz"
+
+[etherscan]
+# Blockscout-based explorers (verification via blockscout)
+hsk_mainnet = { key = "any", url = "https://hashkey.blockscout.com/api", chain = 177 }
+hsk_testnet = { key = "any", url = "https://testnet-explorer.hsk.xyz/api", chain = 133 }
