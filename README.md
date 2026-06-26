@@ -6,6 +6,10 @@
 
 Built for the **HSK Chain "On‑Chain Horizon" Hackathon (Japan)** — AI track. **Live on HashKey Chain mainnet.**
 
+> **▶ Try it live:** **<YOUR-VERCEL-URL>** — connect a wallet, hit *Assess my wallet*, and get a
+> real, Gemini‑written underwriting rationale over your actual on‑chain history, plus a signed
+> on‑chain‑enforceable offer. (The score is deterministic; the AI only narrates it.)
+
 ---
 
 ## The thesis
@@ -19,7 +23,7 @@ empowers finance, new financial infrastructure" thesis.
 **Why it isn't "an LLM said creditworthy":**
 - The load‑bearing score is a **deterministic, transparent, auditable** weighted model over on‑chain
   signals — every point is attributable to a factor (shown in the UI's score breakdown).
-- The LLM (Claude) only writes the **human‑readable rationale**; it never moves the number.
+- The LLM (Gemini) only writes the **human‑readable rationale**; it never moves the number.
 - The AI's authority is **bounded on‑chain**: `CreditManager` re‑checks every cap, so a wrong, stale,
   or even compromised underwriter signature can never push the protocol past its limits.
 
@@ -34,7 +38,7 @@ empowers finance, new financial infrastructure" thesis.
                         (Ethereum history + Credo reputation)
                      2. deterministic score → tier
                         → max LTV / rate / term / principal
-                     3. Claude writes the rationale
+                     3. Gemini writes the rationale
                      4. sign EIP-712 LoanTerms  ──────────────▶  CreditManager.borrow():
                         (the "attestation")                        • verify signature == underwriter
                                                                     • enforce HARD CAPS (below)
@@ -95,8 +99,8 @@ Also deployed on **testnet (chain 133)** — CreditManager `0x0F61C9021B9c9a9bAF
 | Path | What |
 |---|---|
 | `contracts/` | Foundry — Solidity contracts + tests (30 passing) + deploy script |
-| `underwriter/` | TypeScript AI underwriter — signals → deterministic score → Claude rationale → EIP‑712 signature; HTTP API + CLI |
-| `frontend/` | Next.js app — borrower "Statement of Credit Assessment", lender, dashboard |
+| `underwriter/` | TypeScript AI underwriter — signals → deterministic score → Gemini rationale → EIP‑712 signature; standalone HTTP API + CLI |
+| `frontend/` | Next.js app — borrower "Statement of Credit Assessment", lender, dashboard. The same underwriter runs as a built‑in `/api/underwrite` Route Handler, so the live demo is a single deploy. |
 
 | Contract | Role |
 |---|---|
@@ -118,16 +122,16 @@ forge test                                   # 30 passing
 cp .env.example .env                          # set PRIVATE_KEY (funded), UNDERWRITER_ADDRESS
 forge script script/Deploy.s.sol --rpc-url hsk_mainnet --broadcast   # writes deployments/<chainId>.json
 
-# 2. AI underwriter service
-cd ../underwriter && pnpm install
-cp .env.example .env                          # UNDERWRITER_PRIVATE_KEY, ETHERSCAN_API_KEY, ANTHROPIC_API_KEY (optional)
-pnpm test                                     # scoring-engine tests
-pnpm start                                    # HTTP API on :8791
-
-# 3. Frontend
+# 2. Frontend (with the built-in underwriter at /api/underwrite — this is what runs on Vercel)
 cd ../frontend && pnpm install
-cp .env.example .env.local
-pnpm dev                                      # http://localhost:3005
+cp .env.example .env.local                    # UNDERWRITER_PRIVATE_KEY, OPENROUTER_API_KEY, ETHERSCAN_API_KEY
+pnpm dev                                      # http://localhost:3005 — connect a wallet, Assess, borrow
+
+# 3. (optional) Standalone underwriter service, if you prefer it decoupled from the UI
+cd ../underwriter && pnpm install
+cp .env.example .env                          # UNDERWRITER_PRIVATE_KEY, ETHERSCAN_API_KEY, OPENROUTER_API_KEY (optional)
+pnpm test                                     # scoring-engine tests
+pnpm start                                    # HTTP API on :8791 (point the UI at it via NEXT_PUBLIC_UNDERWRITER_URL)
 ```
 
 End‑to‑end from the CLI (no browser): `cd underwriter && npx tsx src/demo.ts 1000 1 177`
@@ -169,5 +173,18 @@ add a **liquidation bounty** and auction seized collateral back into the pool.
   provably bounded on‑chain — new financial infrastructure, done responsibly.
 
 ## Stack
-Solidity 0.8.28 · Foundry · OpenZeppelin · viem · TypeScript · Anthropic SDK (Claude) · Express ·
+Solidity 0.8.28 · Foundry · OpenZeppelin · viem · TypeScript · Gemini via OpenRouter · Express ·
 Next.js 16 · React 19 · Tailwind v4 · wagmi.
+
+---
+
+## Deploy the live demo (Vercel)
+
+The whole demo is a single Next.js app — the underwriter runs as a `/api/underwrite` Route Handler.
+
+1. Import this repo into Vercel and set **Root Directory = `frontend`** (framework auto‑detects as Next.js).
+2. Set environment variables:
+   - **Public:** `NEXT_PUBLIC_CHAIN_ID=177`
+   - **Server (secret):** `UNDERWRITER_PRIVATE_KEY` (must equal `CreditManager.underwriter`),
+     `OPENROUTER_API_KEY`, `CREDO_LLM_MODEL=google/gemini-3-flash-preview`, `ETHERSCAN_API_KEY`
+3. Deploy → connect a wallet → *Assess my wallet*.

@@ -3,7 +3,7 @@ import { loadConfig, loadDeployment, publicClientFor, type Config } from "./conf
 import { creditManagerAbi } from "./abi.js";
 import { gatherSignals } from "./signals.js";
 import { scoreBorrower, type BorrowerSignals, type ScoreResult } from "./scoring.js";
-import { generateRationale } from "./rationale.js";
+import { generateRationale, type RationaleSource } from "./rationale.js";
 import { buildAndSignTerms, type SignedAttestation } from "./attestation.js";
 
 export interface UnderwriteResult {
@@ -11,7 +11,7 @@ export interface UnderwriteResult {
   chainId: number;
   signals: BorrowerSignals;
   score: ScoreResult;
-  rationale: { text: string; source: "claude" | "template" };
+  rationale: { text: string; source: RationaleSource };
   attestation?: SignedAttestation;
   warnings: string[];
 }
@@ -40,7 +40,7 @@ export async function underwrite(
   const score = scoreBorrower(signals);
   const rationale = await generateRationale(signals, score, cfg);
   if (rationale.source === "template") {
-    warnings.push("Rationale generated from template (no ANTHROPIC_API_KEY or LLM call failed).");
+    warnings.push("Rationale generated from template (no OPENROUTER_API_KEY or LLM call failed).");
   }
 
   let attestation: SignedAttestation | undefined;

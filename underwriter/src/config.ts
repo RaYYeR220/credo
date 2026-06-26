@@ -38,7 +38,7 @@ export interface Config {
   termSeconds: number;
   attestationTtlSeconds: number;
   underwriterPrivateKey?: `0x${string}`;
-  anthropicApiKey?: string;
+  openRouterApiKey?: string;
   llmModel: string;
   etherscanApiKey?: string;
 }
@@ -50,9 +50,9 @@ export function loadConfig(): Config {
     termSeconds: Number(process.env.LOAN_TERM_SECONDS ?? 30 * 24 * 60 * 60),
     attestationTtlSeconds: Number(process.env.ATTESTATION_TTL_SECONDS ?? 3600),
     underwriterPrivateKey: process.env.UNDERWRITER_PRIVATE_KEY as `0x${string}` | undefined,
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-    // Per the claude-api skill: default to claude-opus-4-8; override via env for cost.
-    llmModel: process.env.CREDO_LLM_MODEL ?? "claude-opus-4-8",
+    // Gemini via OpenRouter (OpenAI-compatible) writes the rationale only.
+    openRouterApiKey: process.env.OPENROUTER_API_KEY,
+    llmModel: process.env.CREDO_LLM_MODEL ?? "google/gemini-3-flash-preview",
     etherscanApiKey: process.env.ETHERSCAN_API_KEY,
   };
 }

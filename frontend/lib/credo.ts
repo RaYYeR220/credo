@@ -1,6 +1,9 @@
 /** Client for the Credo underwriter service + helpers to map its output to the statement UI. */
 
-const UNDERWRITER_URL = process.env.NEXT_PUBLIC_UNDERWRITER_URL ?? "http://localhost:8787";
+// By default the underwriter runs as a same-origin Next.js Route Handler (`/api/underwrite`), so the
+// whole demo is one Vercel deploy. Set NEXT_PUBLIC_UNDERWRITER_URL to point at a standalone Express
+// service instead (it exposes `/underwrite`).
+const UNDERWRITER_URL = process.env.NEXT_PUBLIC_UNDERWRITER_URL;
 
 export interface FeatureContribution {
   key: string;
@@ -43,13 +46,14 @@ export interface UnderwriteResult {
   address: `0x${string}`;
   chainId: number;
   score: ScoreResult;
-  rationale: { text: string; source: "claude" | "template" };
+  rationale: { text: string; source: "gemini" | "template" };
   attestation?: SignedAttestation;
   warnings: string[];
 }
 
 export async function requestUnderwriting(address: string, chainId: number): Promise<UnderwriteResult> {
-  const res = await fetch(`${UNDERWRITER_URL}/underwrite`, {
+  const endpoint = UNDERWRITER_URL ? `${UNDERWRITER_URL}/underwrite` : "/api/underwrite";
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ address, chainId }),

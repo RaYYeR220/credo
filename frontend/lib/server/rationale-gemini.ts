@@ -1,5 +1,4 @@
-import type { BorrowerSignals, ScoreResult } from "./scoring.js";
-import type { Config } from "./config.js";
+import type { BorrowerSignals, ScoreResult } from "./scoring";
 
 export type RationaleSource = "gemini" | "template";
 
@@ -12,20 +11,23 @@ const SYSTEM_PROMPT =
   "DeFi history, prior liquidations, Credo repayment record). Write for institutional risk reviewers: " +
   "precise, neutral, no marketing tone, no markdown headings or bullet lists.";
 
-/** OpenRouter endpoint (OpenAI-compatible) — defaults to Google's Gemini 3 Flash. */
+/** OpenRouter endpoint (OpenAI-compatible). Default model is Google's Gemini 3 Flash. */
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DEFAULT_MODEL = "google/gemini-3-flash-preview";
 
-/** Generates a human-readable underwriting rationale. Uses Gemini (via OpenRouter) when a key is
- *  configured; otherwise falls back to a deterministic template so the service runs offline. The
- *  numbers never change — the model only narrates the deterministic decision. */
+/**
+ * Generates a human-readable underwriting rationale. Uses Gemini (via OpenRouter) when a key is
+ * configured; otherwise falls back to a deterministic template so the route always responds.
+ * The numbers never change — the model only narrates the deterministic decision.
+ */
 export async function generateRationale(
   signals: BorrowerSignals,
   score: ScoreResult,
-  cfg: Config,
 ): Promise<{ text: string; source: RationaleSource }> {
-  if (cfg.openRouterApiKey) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (apiKey) {
     try {
-      const text = await viaOpenRouter(signals, score, cfg);
+      const text = await viaOpenRouter(signals, score, apiKey);
       return { text, source: "gemini" };
     } catch {
       // fall through to template on any API failure
@@ -37,8 +39,9 @@ export async function generateRationale(
 async function viaOpenRouter(
   signals: BorrowerSignals,
   score: ScoreResult,
-  cfg: Config,
+  apiKey: string,
 ): Promise<string> {
+  const model = process.env.CREDO_LLM_MODEL ?? DEFAULT_MODEL;
   const payload = {
     decision: {
       score: score.score,
@@ -58,34 +61,44 @@ async function viaOpenRouter(
     })),
   };
 
-  const res = await fetch(OPENROUTER_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.openRouterApiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://github.com/RaYYeR220/credo",
-      "X-Title": "Credo",
-    },
-    body: JSON.stringify({
-      model: cfg.llmModel,
-      max_tokens: 1024,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content:
-            `Borrower ${signals.address}. Write the underwriting rationale for this decision.\n\n` +
-            JSON.stringify(payload, null, 2),
-        },
-      ],
-    }),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const res = await fetch(OPENROUTER_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        // OpenRouter attribution headers (optional but recommended).
+        "HTTP-Referer": "https://github.com/RaYYeR220/credo",
+        "X-Title": "Credo",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1024,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content:
+              `Borrower ${signals.address}. Write the underwriting rationale for this decision.\n\n` +
+              JSON.stringify(payload, null, 2),
+          },
+        ],
+      }),
+    });
 
-  if (!res.ok) throw new Error(`OpenRouter returned ${res.status}`);
-  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const text = json.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new Error("empty rationale");
-  return text;
+    if (!res.ok) throw new Error(`OpenRouter returned ${res.status}`);
+    const json = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = json.choices?.[0]?.message?.content?.trim();
+    if (!text) throw new Error("empty rationale");
+    return text;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function templateRationale(signals: BorrowerSignals, score: ScoreResult): string {

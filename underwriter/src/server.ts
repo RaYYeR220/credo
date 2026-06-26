@@ -14,7 +14,7 @@ app.get("/health", (_req, res) => {
     ok: true,
     chainId: cfg.chainId,
     underwriterConfigured: Boolean(cfg.underwriterPrivateKey),
-    llmConfigured: Boolean(cfg.anthropicApiKey),
+    llmConfigured: Boolean(cfg.openRouterApiKey),
     llmModel: cfg.llmModel,
   });
 });
@@ -38,5 +38,5 @@ app.post("/underwrite", async (req, res) => {
 app.listen(cfg.port, () => {
   console.log(`Credo underwriter listening on :${cfg.port} (chain ${cfg.chainId})`);
   if (!cfg.underwriterPrivateKey) console.warn("⚠ UNDERWRITER_PRIVATE_KEY unset — quotes will be unsigned.");
-  if (!cfg.anthropicApiKey) console.warn("⚠ ANTHROPIC_API_KEY unset — rationale uses the offline template.");
+  if (!cfg.openRouterApiKey) console.warn("⚠ OPENROUTER_API_KEY unset — rationale uses the offline template.");
 });

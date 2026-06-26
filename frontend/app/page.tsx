@@ -33,6 +33,8 @@ const DEMO_DATA: StatementData = {
 };
 
 const CHAIN_ID = DEFAULT_CHAIN_ID;
+const EXPLORER_URL =
+  CHAIN_ID === 133 ? "https://testnet-explorer.hsk.xyz" : "https://hashkey.blockscout.com";
 
 export default function Home() {
   const { address, isConnected, chainId } = useAccount();
@@ -149,7 +151,7 @@ export default function Home() {
   } else if (tx === "done") {
     cta = (
       <>
-        <a className="btn primary" href={`https://testnet-explorer.hsk.xyz/tx/${txHash}`} target="_blank" rel="noopener">
+        <a className="btn primary" href={`${EXPLORER_URL}/tx/${txHash}`} target="_blank" rel="noopener">
           View loan on explorer <span className="arr">↗</span>
         </a>
         <button className="btn ghost" type="button" onClick={() => { setAssessment(null); setTx("idle"); setNotice(null); }}>
@@ -163,7 +165,7 @@ export default function Home() {
     const label = tx === "minting" ? "Minting test collateral…" : tx === "approving" ? "Approving collateral…" : tx === "borrowing" ? "Issuing loan…" : "Take loan";
     cta = (
       <>
-        <button className="btn primary" type="button" disabled={busy || !assessment.attestation} onClick={handleTakeLoan}>
+        <button className="btn primary" type="button" disabled={busy || !assessment?.attestation} onClick={handleTakeLoan}>
           {label} {!busy && <span className="arr">→</span>}
         </button>
         <button className="btn ghost" type="button" disabled={busy} onClick={() => { setAssessment(null); setNotice(null); }}>
