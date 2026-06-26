@@ -6,7 +6,7 @@
 
 Built for the **HSK Chain "On‑Chain Horizon" Hackathon (Japan)** — AI track. **Live on HashKey Chain mainnet.**
 
-> **▶ Try it live:** **<YOUR-VERCEL-URL>** — connect a wallet, hit *Assess my wallet*, and get a
+> **▶ Try it live:** **https://credo-phi.vercel.app** — connect a wallet, hit *Assess my wallet*, and get a
 > real, Gemini‑written underwriting rationale over your actual on‑chain history, plus a signed
 > on‑chain‑enforceable offer. (The score is deterministic; the AI only narrates it.)
 
@@ -181,6 +181,8 @@ Next.js 16 · React 19 · Tailwind v4 · wagmi.
 ## Deploy the live demo (Vercel)
 
 The whole demo is a single Next.js app — the underwriter runs as a `/api/underwrite` Route Handler.
+
+> Live at **https://credo-phi.vercel.app**. To deploy your own:
 
 1. Import this repo into Vercel and set **Root Directory = `frontend`** (framework auto‑detects as Next.js).
 2. Set environment variables:
